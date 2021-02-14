@@ -95,59 +95,61 @@ function createAsset(filename) {
   };
 }
 
-// Now that we can extract the dependencies of a single module, we are going to
-// start by extracting the dependencies of the entry file.
+// 一つのモジュールについて依存対象を抜き出せるようになったので、
+// エントリーファイルの依存対象を抜き出していきます。
 //
-// Then, we are going to extract the dependencies of every one of its
-// dependencies. We will keep that going until we figure out about every module
-// in the application and how they depend on one another. This understanding of
-// a project is called the dependency graph.
+// それに続き、各依存対象が依存する対象を抜き出します。アプリケーションのすべての
+// モジュールが互いにどのように依存しあっているのかを把握できるまで、上の工程を
+// 繰り返します。このようにして得られるプロジェクトの全体像は、依存グラフと
+// 呼ばれます。
 function createGraph(entry) {
-  // Start by parsing the entry file.
+  // エントリーファイルのパースから始めます。
   const mainAsset = createAsset(entry);
 
-  // We're going to use a queue to parse the dependencies of every asset. To do
-  // that we are defining an array with just the entry asset.
+  // すべてのアセットの依存対象をパースするためにキューを使います。そのために、
+  // エントリーアセットのみを含む配列を定義します。
   const queue = [mainAsset];
 
-  // We use a `for ... of` loop to iterate over the queue. Initially the queue
-  // only has one asset but as we iterate it we will push additional new assets
-  // into the queue. This loop will terminate when the queue is empty.
+  // `for ... of` ループによりキューを走査します。最初はキューには一つの
+  // アセットしか含まれていませんが、繰り返しごとに新しいアセットをキューに
+  // 追加していきます。このループは、キューから取り出す値がなくなったところで
+  // 終了します。
+  // (訳注: このコメントブロックの最後の文は、原文では"This loop will terminate
+  // when the queue is empty." となっているが、queue が空になることはないため、
+  // 表現を変更している)
   for (const asset of queue) {
-    // Every one of our assets has a list of relative paths to the modules it
-    // depends on. We are going to iterate over them, parse them with our
-    // `createAsset()` function, and track the dependencies this module has in
-    // this object.
+    // すべてのアセットは、自身の依存対象への相対パスを保持しています。
+    // それらを繰り返し取得し、`createAsset()` 関数によりパースし、
+    // このモジュールの依存対象を下のオブジェクトにより記録します。
     asset.mapping = {};
 
-    // This is the directory this module is in.
+    // このモジュールが含まれるディレクトリを表します。
     const dirname = path.dirname(asset.filename);
 
-    // We iterate over the list of relative paths to its dependencies.
+    // 依存対象への相対パスを走査します。
     asset.dependencies.forEach(relativePath => {
-      // Our `createAsset()` function expects an absolute filename. The
-      // dependencies array is an array of relative paths. These paths are
-      // relative to the file that imported them. We can turn the relative path
-      // into an absolute one by joining it with the path to the directory of
-      // the parent asset.
+      // `createAsset()` 関数はファイルへの絶対パスを必要とします。一方、
+      // 依存対象を保持する配列は相対パスの配列となっています。これらのパスは、
+      // インポートする側のファイルに対する相対パスです。この相対パスを親の
+      // アセットのディレクトリと結合することで、絶対パスが得られます。
       const absolutePath = path.join(dirname, relativePath);
 
-      // Parse the asset, read its content, and extract its dependencies.
+      // アセットをパースし、内容を読み込み、依存対象を抜き出します。
       const child = createAsset(absolutePath);
 
-      // It's essential for us to know that `asset` depends on `child`. We
-      // express that relationship by adding a new property to the `mapping`
-      // object with the id of the child.
+      // 「アセット」が「子」に依存していると理解することは重要です。この関係を
+      // 表現するために、`mapping` オブジェクトに新しいプロパティを追加し、
+      // その値を子の id とします。
       asset.mapping[relativePath] = child.id;
 
-      // Finally, we push the child asset into the queue so its dependencies
-      // will also be iterated over and parsed.
+      // 最後に、子のアセットをキューへと追加することで、依存対象自体も
+      // パースされるようにします。
       queue.push(child);
     });
   }
 
-  // At this point the queue is just an array with every module in the target
-  // application: This is how we represent our graph.
+  // この時点でキューは、ターゲットとなるアプリケーションに含まれるすべての
+  // モジュールの配列となっています。これがグラフを表現したものとなります。
   return queue;
 }
 
