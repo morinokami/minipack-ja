@@ -1,29 +1,29 @@
 /**
- * Module bundlers compile small pieces of code into something larger and more
- * complex that can run in a web browser. These small pieces are just JavaScript
- * files, and dependencies between them are expressed by a module system
- * (https://webpack.js.org/concepts/modules).
+ * モジュールバンドラーは、小さなコード片を、ウェブブラウザで動作する、より
+ * 大きく複雑なものへとコンパイルします。この小さなコード片とは JavaScript
+ * ファイルのことであり、各ファイルの依存関係はモジュールシステムによって
+ * 表現されます (https://webpack.js.org/concepts/modules)。
  *
- * Module bundlers have this concept of an entry file. Instead of adding a few
- * script tags in the browser and letting them run, we let the bundler know
- * which file is the main file of our application. This is the file that should
- * bootstrap our entire application.
+ * モジュールバンドラーはエントリーファイルという概念をもちます。いくつかの
+ * script タグをブラウザに追加してそれらを実行する代わりに、どれが
+ * アプリケーションのメインファイルなのかをバンドラーに知らせるのです。
+ * このファイルはアプリケーション全体を起動させるファイルです。
  *
- * Our bundler will start from that entry file, and it will try to understand
- * which files it depends on. Then, it will try to understand which files its
- * dependencies depend on. It will keep doing that until it figures out about
- * every module in our application, and how they depend on one another.
+ * 私たちのバンドラーは、エントリーファイルからスタートし、それが他のどの
+ * ファイルに依存しているのかを確認します。続いて、その依存対象が依存している
+ * ファイルを確認します。アプリケーションのすべてのモジュールが互いに
+ * どのように依存しあっているのかを把握できるまで、上の工程を繰り返します。
  *
- * This understanding of a project is called the dependency graph.
+ * このようにして得られるプロジェクトの全体像は、依存グラフと呼ばれます。
  *
- * In this example, we will create a dependency graph and use it to package
- * all of its modules in one bundle.
+ * 以下の例では、私たちは依存グラフを作成し、それを用いてすべてのモジュールを
+ * 一つのバンドルへとまとめ上げます。
  *
- * Let's begin :)
+ * 始めましょう :)
  *
- * Please note: This is a very simplified example. Handling cases such as
- * circular dependencies, caching module exports, parsing each module just once
- * and others are skipped to make this example as simple as possible.
+ * 注意点: これはとても簡略化された例です。できる限り例をシンプルに保つため、
+ * 依存の循環への対処、エクスポートされるモジュールのキャッシュ、
+ * 各モジュールを一度だけパースすること、等々は考慮されていません。
  */
 
 const fs = require('fs');
