@@ -1,34 +1,34 @@
 ## 📦 Minipack
 
-> A simplified example of a modern module bundler written in JavaScript
+> JavaScript によるモダンなモジュールバンドラーの簡易な例
 
-### Introduction
+### はじめに
 
-As front-end developers, we spend a lot of time working with tools like [Webpack](https://github.com/webpack/webpack), [Browserify](https://github.com/browserify/browserify), and [Parcel](https://github.com/parcel-bundler/parcel).
+フロントエンド開発者として、私たちは [webpack](https://github.com/webpack/webpack) や [Browserify](https://github.com/browserify/browserify)、[Parcel](https://github.com/parcel-bundler/parcel) といったツールの取り扱いに多くの時間を割いています。
 
-Understanding how those tools work can help us make better decisions on how we write our code. By understanding how our code turns into a bundle and how that bundle looks like we can also debug it better.
+これらのツールの仕組みを理解することにより、コードの書き方についてより良い決定ができるようになります。コードがどのようにバンドルとなり、バンドルがどのような見た目をしているかを理解することは、それをデバッグする際にも役立ちます。
 
-The purpose of this project is to explain how most bundlers work under the hood. It contains a short implementation of a simplified but still reasonably accurate bundler. Along with the code, there are comments explaining what the code is trying to achieve.
+このプロジェクトの目的は、多くのバンドラーが内部で何をしているのかを説明することです。プロジェクトには、単純化されてはいますが、十分に本物に近いバンドラーが含まれています。コードと並んで、そのコードが何をしようとしているかを説明するコメントが付記されています。
 
-### Cool, where do I start?
+### 面白そう、何から始めればいいですか？
 
-Head on to the source code: [src/minipack.js](src/minipack.js).
+ソースコードをどうぞ: [src/minipack.js](src/minipack.js)
 
-### Try running the code
+### コードを実行してみる
 
-Start by installing dependencies:
+まず依存パッケージをインストールしましょう:
 
 ```sh
 $ npm install
 ```
 
-And then run our script:
+そしてスクリプトを実行します:
 
 ```sh
 $ node src/minipack.js
 ```
 
-### Additional links
+### さらなるリンク
 
 - [AST Explorer](https://astexplorer.net)
 - [Babel REPL](https://babeljs.io/repl)
@@ -36,8 +36,16 @@ $ node src/minipack.js
 - [Babel Plugin Handbook](https://github.com/thejameskyle/babel-handbook/blob/master/translations/en/plugin-handbook.md)
 - [Webpack: Modules](https://webpack.js.org/concepts/modules)
 
-### Read this in other languages
+### 他の言語で読む
 
-- [한글/Korean](https://github.com/hg-pyun/minipack-kr)
-- [中文/Chinese](https://github.com/chinanf-boy/minipack-explain)
-- [Русский/Russian](https://github.com/makewebme/build-your-own-webpack)
+- [English/英語](https://github.com/ronami/minipack)
+- [한글/韓国語](https://github.com/hg-pyun/minipack-kr)
+- [中文/中国語](https://github.com/chinanf-boy/minipack-explain)
+- [Русский/ロシア語](https://github.com/makewebme/build-your-own-webpack)
+
+###  訳者注記
+
+より良い理解の助けになると考え、もとのプロジェクトにいくつかのファイルを追加しました:
+
+- コメントを削除したソースコード: [src/minipack-code-only.js](src/minipack-code-only.js)
+- webpack によるバンドルの例: [bundle-webpack.js](bundle-webpack.js)
