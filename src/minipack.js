@@ -153,44 +153,44 @@ function createGraph(entry) {
   return queue;
 }
 
-// Next, we define a function that will use our graph and return a bundle that
-// we can run in the browser.
+// 次に、グラフを使用して、ブラウザで実行可能なバンドルを返す関数を定義します。
 //
-// Our bundle will have just one self-invoking function:
+// バンドルは、自身を実行する関数を一つだけもちます:
 //
 // (function() {})()
 //
-// That function will receive just one parameter: An object with information
-// about every module in our graph.
+// 上の関数は、グラフに含まれるすべてのモジュールについての情報を保持する
+// オブジェクトを、唯一のパラメータとします。
 function bundle(graph) {
   let modules = '';
 
-  // Before we get to the body of that function, we'll construct the object that
-  // we'll pass to it as a parameter. Please note that this string that we're
-  // building gets wrapped by two curly braces ({}) so for every module, we add
-  // a string of this format: `key: value,`.
+  // 関数の本体に取り掛かる前に、パラメータとして与えるオブジェクトを作成します。
+  // ここで作成する文字列は二つの波括弧 ({}) に包まれるため、すべての
+  // モジュールについて `key: value,` という形式の文字列を追加するという点に
+  // 注意してください。
   graph.forEach(mod => {
-    // Every module in the graph has an entry in this object. We use the
-    // module's id as the key and an array for the value (we have 2 values for
-    // every module).
+    // グラフに含まれるすべてのモジュールはこのオブジェクトの要素となります。
+    // ここではモジュールの id をキーとし、配列をその値とします (モジュール
+    // ごとに二つの値をもちます)。
     //
-    // The first value is the code of each module wrapped with a function. This
-    // is because modules should be scoped: Defining a variable in one module
-    // shouldn't affect others or the global scope.
+    // 最初の値は、関数により包まれたモジュールのコードです。このようにするのは、
+    // モジュールがスコープをもつべきだからです。あるモジュールで定義された変数が、
+    // 他のモジュールやグローバルスコープに影響を与えてはいけません。
     //
-    // Our modules, after we transpiled them, use the CommonJS module system:
-    // They expect a `require`, a `module` and an `exports` objects to be
-    // available. Those are not normally available in the browser so we'll
-    // implement them and inject them into our function wrappers.
+    // 私たちのモジュールは、トランスパイルされたあと、CommonJS の
+    // モジュールシステムを使用します。すなわち、トランスパイルされたコードは、
+    // `require`、`module`、`exports` オブジェクトが使用可能であることを
+    // 前提としています。これらは普通はブラウザで使用できないため、自ら実装し、
+    // 関数のラッパーに注入します。
     //
-    // For the second value, we stringify the mapping between a module and its
-    // dependencies. This is an object that looks like this:
+    // 二つ目の値は、モジュールとその依存対象のマッピングを文字列化したもの
+    // となります。これは次のようなオブジェクトです:
     // { './relative/path': 1 }.
     //
-    // This is because the transpiled code of our modules has calls to
-    // `require()` with relative paths. When this function is called, we should
-    // be able to know which module in the graph corresponds to that relative
-    // path for this module.
+    // このようにするのは、トランスパイルされたモジュールのコードが相対パスを用いて
+    // `require()` を呼び出すためです。この関数が呼び出された際に、グラフの中の
+    // どのモジュールが、このモジュールで使用された相対パスと対応するのかを
+    // 知る必要があるのです。
     modules += `${mod.id}: [
       function (require, module, exports) {
         ${mod.code}
@@ -199,27 +199,26 @@ function bundle(graph) {
     ],`;
   });
 
-  // Finally, we implement the body of the self-invoking function.
+  // 最後に、自身を実行する関数の本体を実装します。
   //
-  // We start by creating a `require()` function: It accepts a module id and
-  // looks for it in the `modules` object we constructed previously. We
-  // destructure over the two-value array to get our function wrapper and the
-  // mapping object.
+  // まず `require()` 関数を作成します。この関数はモジュールの id を受け取り、
+  // 上で作成した `modules` オブジェクトからその値を見つけます。二つの値を
+  // もつ配列から、関数のラッパーとマッピングオブジェクトを分割代入します。
   //
-  // The code of our modules has calls to `require()` with relative file paths
-  // instead of module ids. Our require function expects module ids. Also, two
-  // modules might `require()` the same relative path but mean two different
-  // modules.
+  // モジュールのコードでは、モジュールの id ではなく、相対パスを用いて
+  // `require()` を呼び出します。一方、私たちの require 関数はモジュール id を
+  // 受け付けます。また、二つのモジュールで同じ相対パスを `require()` していても、
+  // 実際は異なるモジュールを意味しているかもしれません。
   //
-  // To handle that, when a module is required we create a new, dedicated
-  // `require` function for it to use. It will be specific to that module and
-  // will know to turn its relative paths into ids by using the module's
-  // mapping object. The mapping object is exactly that, a mapping between
-  // relative paths and module ids for that specific module.
+  // これに対処するため、あるモジュールが require された際に、それが使用する
+  // 専用の `require` 関数を新しく定義します。これはそのモジュール専用であり、
+  // モジュールのマッピングオブジェクトを使用して相対パスを id へと変換します。
+  // マッピングオブジェクトはまさにそういうものであり、相対パスと特定の
+  // モジュールの id を対応付けるものなのです、
   //
-  // Lastly, with CommonJs, when a module is required, it can expose values by
-  // mutating its `exports` object. The `exports` object, after it has been
-  // changed by the module's code, is returned from the `require()` function.
+  // 最後に、CommonJS において、モジュールが require された場合、`exports`
+  // オブジェクトの変更を通じて値を外部に渡します。`exports` オブジェクトは、
+  // モジュールのコードによって変更されたあと、`require()` 関数から返されます。
   const result = `
     (function(modules) {
       function require(id) {
@@ -240,7 +239,7 @@ function bundle(graph) {
     })({${modules}})
   `;
 
-  // We simply return the result, hurray! :)
+  // シンプルに結果を返します、やりました！:)
   return result;
 }
 
