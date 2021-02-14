@@ -34,60 +34,59 @@ const {transformFromAst} = require('babel-core');
 
 let ID = 0;
 
-// We start by creating a function that will accept a path to a file, read
-// its contents, and extract its dependencies.
+// ファイルへのパスを受け取り、その中身を読み込み、依存対象を抜き出す関数を
+// まず作成します。
 function createAsset(filename) {
-  // Read the content of the file as a string.
+  // ファイルの中身を文字列として読み込みます。
   const content = fs.readFileSync(filename, 'utf-8');
 
-  // Now we try to figure out which files this file depends on. We can do that
-  // by looking at its content for import strings. However, this is a pretty
-  // clunky approach, so instead, we will use a JavaScript parser.
+  // ここで、このファイルが他のどのファイルに依存しているのかを確認します。
+  // import という文字列を探すことでも可能ですが、これは少し不格好なため、
+  // 代わりに JavaScript パーサーを使うことにします。
   //
-  // JavaScript parsers are tools that can read and understand JavaScript code.
-  // They generate a more abstract model called an AST (abstract syntax tree).
+  // JavaScript パーサーは、JavaScript のコードを読み込んで理解するための
+  // ツールです。AST (抽象構文木) と呼ばれる、より抽象的なモデルを生成します。
 
-  // I strongly suggest that you look at AST Explorer (https://astexplorer.net)
-  // to see how an AST looks like.
+  // AST の見た目を確認するために、AST Explorer (https://astexplorer.net) を
+  // 見てみることを強くおすすめします。
   //
-  // The AST contains a lot of information about our code. We can query it to
-  // understand what our code is trying to do.
+  // AST は、私たちのコードに関する多くの情報を含んでいます。AST に対し、
+  // コードがおこなおうとしていることを問い合わせることができます。
   const ast = babylon.parse(content, {
     sourceType: 'module',
   });
 
-  // This array will hold the relative paths of modules this module depends on.
+  // この配列は、このモジュールが依存するモジュールの相対パスを格納します。
   const dependencies = [];
 
-  // We traverse the AST to try and understand which modules this module depends
-  // on. To do that, we check every import declaration in the AST.
+  // このモジュールが依存するモジュールを把握するために、AST を走査します。
+  // そのために、AST に含まれるすべてのインポート宣言をチェックします。
   traverse(ast, {
-    // EcmaScript modules are fairly easy because they are static. This means
-    // that you can't import a variable, or conditionally import another module.
-    // Every time we see an import statement we can just count its value as a
-    // dependency.
+    // EcmaScript モジュールは静的であるためとても簡単です。つまり、変数を
+    // インポートしたり、条件に応じて他のモジュールをインポートすることはできません。
+    // インポート文を見たら、その値が依存対象であると考えればよいのです。
     ImportDeclaration: ({node}) => {
-      // We push the value that we import into the dependencies array.
+      // インポートする値を、依存対象を格納する配列に追加します。
       dependencies.push(node.source.value);
     },
   });
 
-  // We also assign a unique identifier to this module by incrementing a simple
-  // counter.
+  // シンプルなカウンターを増加させ、このモジュールにユニークな ID を割り当てます。
   const id = ID++;
 
-  // We use EcmaScript modules and other JavaScript features that may not be
-  // supported on all browsers. To make sure our bundle runs in all browsers we
-  // will transpile it with Babel (see https://babeljs.io).
+  // 私たちは、EcmaScript モジュールや、すべてのブラウザではサポートされていない
+  // JavaScript の他の機能を使用します。バンドルがすべてのブラウザで実行できる
+  // ように、これを Babel によりトランスパイルします
+  // (https://babeljs.io を確認してください)。
   //
-  // The `presets` option is a set of rules that tell Babel how to transpile
-  // our code. We use `babel-preset-env` to transpile our code to something
-  // that most browsers can run.
+  // `presets` オプションは、コードのトランスパイルの仕方を Babel に伝える
+  // ルールのセットです。大方のブラウザが実行できるものへとコードを
+  // トランスパイルするために、ここでは `babel-preset-env` を使用します。
   const {code} = transformFromAst(ast, null, {
     presets: ['env'],
   });
 
-  // Return all information about this module.
+  // このモジュールに関するすべての情報を返します。
   return {
     id,
     filename,
